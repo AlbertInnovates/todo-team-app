@@ -1,4 +1,17 @@
+// Top of file
+const util = require('util');
+
+// After creating pool
+pool.on('error', (err) => {
+  console.error('Database error:', err);
+});
+
+// In registration endpoint (before try block)
+console.log('Registration request:', req.body);
+// Load environment variables
 require('dotenv').config();
+
+// Import required modules
 const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
@@ -10,8 +23,8 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 // Middleware
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(express.json()); // Parse JSON request bodies
+app.use(cors()); // Enable CORS
+app.use(express.json()); // Parse JSON bodies
 
 // Database Configuration
 const pool = new Pool({
@@ -21,7 +34,11 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'Albertnisingizwe@34',
   port: process.env.DB_PORT || 5432,
 });
-
+// Add detailed request logging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
 // Test database connection
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
@@ -30,272 +47,138 @@ pool.query('SELECT NOW()', (err, res) => {
     console.log(`✅ Database connected at ${res.rows[0].now}`);
   }
 });
-
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW() AS current_time');
+    res.json({
+      database: "Connected",
+      time: result.rows[0].current_time
+    });
+  } catch (err) {
+    console.error('Database test failed:', err);
+    res.status(500).json({
+      error: "Database connection failed",
+      details: err.message
+    });
+  }
+});
 // JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'your_strong_secret_here';
 
-// ================================================
-// 1. USER REGISTRATION ENDPOINT
-// ================================================
+// ======================
+// ROUTES
+// ======================
+app.get('/api/db-test', async (req, res) => {
+  try {
+    // Test connection
+    const connResult = await pool.query('SELECT NOW() AS current_time');
+    
+    // Test users table
+    const tableResult = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_name = 'users'
+      ) AS table_exists
+    `);
+    
+    res.json({
+      status: 'Database connected',
+      current_time: connResult.rows[0].current_time,
+      users_table_exists: tableResult.rows[0].table_exists
+    });
+  } catch (error) {
+    console.error('Database test failed:', error);
+    res.status(500).json({
+      error: 'Database connection failed',
+      details: error.message
+    });
+  }
+});
+// Root endpoint - MUST HAVE
+app.get('/', (req, res) => {
+  res.send('🚀 Todo App Backend is Running!');
+});
+
+// User Registration
 app.post('/api/auth/register', async (req, res) => {
   const { name, email, password } = req.body;
-
-  // Input validation
+  
+  // Detailed validation
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
+  console.log(`[REGISTER] Starting registration for: ${email}`);
+  
   try {
-    // Check if email exists
-    const emailCheck = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
+    // 1. Check if user exists
+    const userCheck = await pool.query(
+      'SELECT id FROM users WHERE email = $1', 
       [email]
     );
     
-    if (emailCheck.rows.length > 0) {
+    if (userCheck.rows.length > 0) {
+      console.log(`[REGISTER] Email already exists: ${email}`);
       return res.status(409).json({ error: 'Email already registered' });
     }
 
-    // Hash password
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    // 2. Hash password with error handling
+    let hashedPassword;
+    try {
+      hashedPassword = await bcrypt.hash(password, 10);
+      console.log('[REGISTER] Password hashed successfully');
+    } catch (hashError) {
+      console.error('[REGISTER] Password hash failed:', hashError);
+      return res.status(500).json({ error: 'Password processing failed' });
+    }
 
-    // Create new user
+    // 3. Create user
     const newUser = await pool.query(
       `INSERT INTO users (name, email, password)
        VALUES ($1, $2, $3)
        RETURNING id, name, email`,
       [name, email, hashedPassword]
     );
+    console.log('[REGISTER] User created:', newUser.rows[0]);
 
-    // Generate JWT token
+    // 4. Generate token
     const token = jwt.sign(
       { userId: newUser.rows[0].id },
       JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    // Successful response
     res.status(201).json({
       message: 'Registration successful!',
       user: newUser.rows[0],
       token
     });
-
+    
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ================================================
-// 2. USER LOGIN ENDPOINT
-// ================================================
-app.post('/api/auth/login', async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
-  }
-
-  try {
-    // Find user by email
-    const userResult = await pool.query(
-      'SELECT * FROM users WHERE email = $1',
-      [email]
-    );
+    console.error('[REGISTER] CRITICAL ERROR:', error.stack);
     
-    if (userResult.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    // Handle specific PostgreSQL errors
+    if (error.code) {
+      console.error('PostgreSQL error code:', error.code);
+      
+      // Unique violation (duplicate email)
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'Email already registered' });
+      }
     }
-
-    const user = userResult.rows[0];
     
-    // Verify password
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id },
-      JWT_SECRET,
-      { expiresIn: '1h' }
-    );
-
-    // Successful response
-    res.json({
-      message: 'Login successful!',
-      user: { id: user.id, name: user.name, email: user.email },
-      token
+    res.status(500).json({ 
+      error: 'Server error',
+      details: error.message // Send error details for debugging
     });
-
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// ================================================
-// 3. AUTHENTICATION MIDDLEWARE
-// ================================================
-const authenticate = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Authorization header missing' });
-  }
-
-  const token = authHeader.split(' ')[1];
-  
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.userId = decoded.userId;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid token' });
-  }
-};
-
-// ================================================
-// 4. TASK MANAGEMENT ENDPOINTS
-// ================================================
-
-// Create new task
-app.post('/api/tasks', authenticate, async (req, res) => {
-  const { title, description, due_date } = req.body;
-  
-  if (!title) {
-    return res.status(400).json({ error: 'Title is required' });
-  }
-
-  try {
-    const newTask = await pool.query(
-      `INSERT INTO tasks (title, description, due_date, user_id)
-       VALUES ($1, $2, $3, $4)
-       RETURNING *`,
-      [title, description, due_date, req.userId]
-    );
-    
-    res.status(201).json(newTask.rows[0]);
-    
-  } catch (error) {
-    console.error('Create task error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Get user's tasks
-app.get('/api/tasks', authenticate, async (req, res) => {
-  try {
-    const tasks = await pool.query(
-      'SELECT * FROM tasks WHERE user_id = $1',
-      [req.userId]
-    );
-    
-    res.json(tasks.rows);
-    
-  } catch (error) {
-    console.error('Get tasks error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Update task status
-app.patch('/api/tasks/:id/complete', authenticate, async (req, res) => {
-  const taskId = req.params.id;
-  
-  try {
-    const updatedTask = await pool.query(
-      `UPDATE tasks SET completed = true 
-       WHERE id = $1 AND user_id = $2
-       RETURNING *`,
-      [taskId, req.userId]
-    );
-    
-    if (updatedTask.rows.length === 0) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    
-    res.json(updatedTask.rows[0]);
-    
-  } catch (error) {
-    console.error('Complete task error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Delete task
-app.delete('/api/tasks/:id', authenticate, async (req, res) => {
-  const taskId = req.params.id;
-  
-  try {
-    const result = await pool.query(
-      'DELETE FROM tasks WHERE id = $1 AND user_id = $2',
-      [taskId, req.userId]
-    );
-    
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    
-    res.sendStatus(204);
-    
-  } catch (error) {
-    console.error('Delete task error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ================================================
-// 5. TASK ASSIGNMENT ENDPOINT
-// ================================================
-app.post('/api/tasks/:id/assign', authenticate, async (req, res) => {
-  const taskId = req.params.id;
-  const { userId } = req.body;
-  
-  if (!userId) {
-    return res.status(400).json({ error: 'User ID required' });
-  }
-
-  try {
-    // Verify task exists and belongs to current user
-    const taskCheck = await pool.query(
-      'SELECT * FROM tasks WHERE id = $1 AND user_id = $2',
-      [taskId, req.userId]
-    );
-    
-    if (taskCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    
-    // Verify target user exists
-    const userCheck = await pool.query(
-      'SELECT * FROM users WHERE id = $1',
-      [userId]
-    );
-    
-    if (userCheck.rows.length === 0) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    // Create assignment
-    await pool.query(
-      `INSERT INTO assignments (task_id, user_id)
-       VALUES ($1, $2)`,
-      [taskId, userId]
-    );
-    
-    res.status(201).json({ message: 'Task assigned successfully' });
-    
-  } catch (error) {
-    console.error('Assign task error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Start server
+// ======================
+// START SERVER
+// ======================
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`✅ Backend running on http://localhost:${PORT}`);
+  console.log(`✅ Registration: POST http://localhost:${PORT}/api/auth/register`);
+  console.log(`✅ Login: POST http://localhost:${PORT}/api/auth/login`);
 });

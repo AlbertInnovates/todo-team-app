@@ -24,3 +24,7 @@ CREATE TABLE assignments (
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   PRIMARY KEY (task_id, user_id)
 );
+
+-- Grant all privileges to your user
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO postgres;
