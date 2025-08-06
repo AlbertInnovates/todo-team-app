@@ -1,192 +1,38 @@
-# 🧠 TeamTasker – Collaborative Todo Management App
+🖥️ Frontend – Todo Team App
+The frontend of the Todo Team App is built using React.js, offering a responsive, collaborative task management interface designed for teams and organizations. It focuses on ease of use, real-time updates, and task transparency within a shared workspace.
 
-A full-stack team productivity app designed to simplify task management and assignment in collaborative environments.
+🔧 Tech Stack
+React (with Hooks)
 
----
+React Router DOM – for routing between login, dashboard, etc.
 
-## 🚀 Core Value Proposition
+Axios – to communicate with the backend API
 
-> "Simplify team coordination and task tracking with secure authentication, real-time task updates, and an intuitive, responsive dashboard."
+Tailwind CSS – for clean, modern UI styling
 
----
+Context API – for global state management (auth, tasks)
 
-## 🛠️ Tech Stack
+💡 Key Features
+Feature	Description
+🔐 Authentication	Login and token handling using JWT (stored in localStorage)
+📋 Task Management	Add, update, delete, and assign tasks to team members
+👥 Team Collaboration	View tasks by all team members on a shared dashboard
+📈 Status Tracking	Tasks can be marked as pending, in progress, or completed
+🧭 Navigation	Clean navigation using React Router (Login, Dashboard, Profile, etc.)
 
-**Frontend:** React, React Router, Context API  
-**Backend:** Node.js, Express.js, PostgreSQL (or SQLite)  
-**Authentication:** JWT (with Refresh Tokens)  
-**Deployment:** Vercel (Frontend), Railway (Backend)  
-**Version Control:** Git + GitHub
+🔐 Authentication Flow
+On login, the frontend receives a JWT token from the backend and stores it in localStorage.
 
----
+AuthContext manages access to protected routes.
 
-## 📦 Project Structure
+Axios includes the token in headers for secure API calls.
 
-todo-team-app/
-├── backend/
-│ ├── index.js
-│ ├── package.json
-│ └── ... (controllers, routes, db)
-└── frontend/
-├── src/
-├── public/
-└── package.json
+🧩 Component Highlights
+TaskCard.jsx – Displays each task with status and assigned user.
 
+TeamBoard.jsx – Lists all tasks and allows real-time updates.
 
----
+CreateTaskForm.jsx – Form to create new team tasks.
 
-## ✨ Key Features
+Navbar.jsx – Dynamic nav depending on user state.
 
-
----
-
-## ✨ Key Features
-
-✅ Secure JWT Authentication  
-✅ Create Personal and Team Tasks  
-✅ Assign Tasks to Team Members  
-✅ Task Completion Status  
-✅ Deadline Tracking and Overdue Highlighting  
-✅ RESTful API Design (15+ Endpoints)  
-✅ Responsive Dashboard with Analytics  
-✅ Protected Routes with React Router
-
----
-
-## 🔐 Authentication Flow
-
-- Register and login users with password hashing
-- JWT issued on login and stored in localStorage
-- Middleware to protect routes
-- Logout and session expiration supported
-
----
-
-## 🔄 API Overview
-
-### `POST /api/auth/register`
-
-Registers a new user.POST /api/auth/login
-Returns JWT access token and user data.
-
-GET /api/tasks
-Returns all tasks belonging to the user.
-
-POST /api/tasks
-Create a new task (optionally assign to team member).
-
-PUT /api/tasks/:id
-Update task details or reassign.
-
-DELETE /api/tasks/:id
-Delete a task owned by the user.
-
-🧩 Database Schema
-Users
-
-id, name, email, password
-
-Tasks
-
-id, title, description, due_date, status, user_id, assigned_to, created_at
-
-📊 Frontend UI Overview
-React + Router for navigation
-
-Context API or useState for user/token management
-
-Pages:
-
-Login / Register
-
-Dashboard (My Tasks, Assigned Tasks)
-
-Create / Edit Tasks
-
-🗓️ Development Timeline
-Day	Focus
-Day 1	Setup Backend & Frontend + Plan DB
-Day 2	Backend Authentication
-Day 3	Task CRUD + Assignment
-Day 4	Frontend Auth & Routing
-Day 5	Task Dashboard UI
-Day 6	Team Assignments + Deadlines
-Day 7	Testing + Deployment
-
-🧠 Problem-Solving Example
-Problem: PostgreSQL connection failures during production deploys.
-Solution:
-
-Added connection pooling with retry logic
-
-Added DB health-check endpoint
-
-Improved error logging for easier debugging
-
-📚 Learning Outcomes
-mermaid
-Copy
-Edit
-mindmap
-  root((Learned))
-    Backend
-      JWT Authentication
-      Express Routing
-      PostgreSQL Integration
-    Frontend
-      React Auth Flow
-      Dashboard Design
-      Form Handling
-    General
-      Git Branching
-      Project Deployment
-      Documentation
-      ---
-      
-📈 Project Metrics
-🧾 ~2,800+ Lines of Code
-
-🌿 5 GitHub Branches
-
-✅ 75% Backend Test Coverage
-
-📘 15+ Pages of Documentation
-
-⌛ Built in 7 Days (solo dev)
-
-🌍 Live Demo
-Coming soon on:
-
-Frontend – Vercel
-
-Backend – Railway
-
-📸 Visual Highlights
-System Architecture Diagram
-
-
-ER Diagram
-
-
-UI Screenshots
-
-Login	Dashboard	Task Form
-
-📌 GitHub Repo
-🔗 View Code on GitHub(https://github.com/AlbertInnovates/todo-team-app/edit/main/todo-team-app)
-
-🧠 Future Enhancements
-🔔 Email notifications for tasks
-
-🧑‍🤝‍🧑 Role-based access (Admin, Member)
-
-📅 Calendar view of deadlines
-
-📈 Analytics for team leaders
-
-```json
-{
-  "name": "Jane",
-  "email": "jane@example.com",
-  "password": "SecurePass123"
-}
