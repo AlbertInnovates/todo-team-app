@@ -1,4 +1,4 @@
-🖥️ Frontend – Todo Team App
+
 The frontend of the Todo Team App is built using React.js, offering a responsive, collaborative task management interface designed for teams and organizations. It focuses on ease of use, real-time updates, and task transparency within a shared workspace.
 
 🔧 Tech Stack
