@@ -1,70 +1,167 @@
-# Getting Started with Create React App
+# 🧠 TeamTasker – Collaborative Todo Management App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A full-stack team productivity app designed to simplify task management and assignment in collaborative environments.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 🚀 Core Value Proposition
 
-### `npm start`
+> "Simplify team coordination and task tracking with secure authentication, real-time task updates, and an intuitive, responsive dashboard."
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🛠️ Tech Stack
 
-### `npm test`
+**Frontend:** React, React Router, Context API  
+**Backend:** Node.js, Express.js, PostgreSQL (or SQLite)  
+**Authentication:** JWT (with Refresh Tokens)  
+**Deployment:** Vercel (Frontend), Railway (Backend)  
+**Version Control:** Git + GitHub
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 📦 Project Structure
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+todo-team-app/
+├── backend/
+│ ├── index.js
+│ ├── package.json
+│ └── ... (controllers, routes, db)
+└── frontend/
+├── src/
+├── public/
+└── package.json
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## ✨ Key Features
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+✅ Secure JWT Authentication  
+✅ Create Personal and Team Tasks  
+✅ Assign Tasks to Team Members  
+✅ Task Completion Status  
+✅ Deadline Tracking and Overdue Highlighting  
+✅ RESTful API Design (15+ Endpoints)  
+✅ Responsive Dashboard with Analytics  
+✅ Protected Routes with React Router
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 🔐 Authentication Flow
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- Register and login users with password hashing
+- JWT issued on login and stored in localStorage
+- Middleware to protect routes
+- Logout and session expiration supported
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## 🔄 API Overview
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### `POST /api/auth/register`
 
-### Code Splitting
+Registers a new user.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```json 
+{
+  "name": "Jane",
+  "email": "jane@example.com",
+  "password": "SecurePass123"
+}
 
-### Analyzing the Bundle Size
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-### Making a Progressive Web App
+POST /api/auth/login
+Returns JWT access token and user data.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+GET /api/tasks
+Returns all tasks belonging to the user.
 
-### Advanced Configuration
+POST /api/tasks
+Create a new task (optionally assign to team member).
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+PUT /api/tasks/:id
+Update task details or reassign.
 
-### Deployment
+DELETE /api/tasks/:id
+Delete a task owned by the user.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+🧩 Database Schema
+Users
 
-### `npm run build` fails to minify
+id, name, email, password
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Tasks
+
+id, title, description, due_date, status, user_id, assigned_to, created_at
+
+(You may include diagrams of this below using Figma or dbdiagram.io)
+
+📊 Frontend UI Overview
+React + Router for navigation
+
+Context API or useState for user/token management
+
+Pages:
+
+Login / Register
+
+Dashboard (My Tasks, Assigned Tasks)
+
+Create / Edit Tasks
+
+🧠 Problem-Solving Example
+Problem: PostgreSQL connection failures during production deploys.
+Solution:
+
+Added connection pooling with retry logic
+
+Added DB health-check endpoint
+
+Improved error logging for easier debugging
+
+📚 Learning Outcomes:
+
+mindmap
+  root((Learned))
+    Backend
+      JWT Authentication
+      Express Routing
+      PostgreSQL Integration
+    Frontend
+      React Auth Flow
+      Dashboard Design
+      Form Handling
+    General
+      Git Branching
+      Project Deployment
+      Documentation
+
+💬 Contact Me:
+
+📧 nisingizwe34@gmail.com
+🌐 LinkedIn: NISINGIZWE ALBERT
+
+📈 Project Metrics:
+
+🧾 ~2,800+ Lines of Code
+
+🌿 5 GitHub Branches
+
+✅ 75% Backend Test Coverage
+
+📘 15+ Pages of Documentation
+
+⌛ Built in 7 Days (solo dev)
+
+🧠 Future Enhancements:
+
+🔔 Email notifications for tasks
+
+🧑‍🤝‍🧑 Role-based access (Admin, Member)
+
+📅 Calendar view of deadlines
+
+📈 Analytics for team leaders
+
