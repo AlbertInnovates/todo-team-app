@@ -38,7 +38,108 @@ todo-team-app/
 ## ✨ Key Features
 
 ✅ Secure JWT Authentication  
-✅ Create Personal and Team Tasks  
+✅ Create Personal and Team Tasks{
+  "name": "Jane",
+  "email": "jane@example.com",
+  "password": "SecurePass123"
+}
+
+
+
+POST /api/auth/login
+Returns JWT access token and user data.
+
+GET /api/tasks
+Returns all tasks belonging to the user.
+
+POST /api/tasks
+Create a new task (optionally assign to team member).
+
+PUT /api/tasks/:id
+Update task details or reassign.
+
+DELETE /api/tasks/:id
+Delete a task owned by the user.
+
+🧩 Database Schema
+Users
+
+id, name, email, password
+
+Tasks
+
+id, title, description, due_date, status, user_id, assigned_to, created_at
+
+(You may include diagrams of this below using Figma or dbdiagram.io)
+
+📊 Frontend UI Overview
+React + Router for navigation
+
+Context API or useState for user/token management
+
+Pages:
+
+Login / Register
+
+Dashboard (My Tasks, Assigned Tasks)
+
+Create / Edit Tasks
+
+🧠 Problem-Solving Example
+Problem: PostgreSQL connection failures during production deploys.
+Solution:
+
+Added connection pooling with retry logic
+
+Added DB health-check endpoint
+
+Improved error logging for easier debugging
+
+📚 Learning Outcomes:
+
+mindmap
+  root((Learned))
+    Backend
+      JWT Authentication
+      Express Routing
+      PostgreSQL Integration
+    Frontend
+      React Auth Flow
+      Dashboard Design
+      Form Handling
+    General
+      Git Branching
+      Project Deployment
+      Documentation
+
+💬 Contact Me:
+
+📧 nisingizwe34@gmail.com
+🌐 LinkedIn: NISINGIZWE ALBERT
+
+📈 Project Metrics:
+
+🧾 ~2,800+ Lines of Code
+
+🌿 5 GitHub Branches
+
+✅ 75% Backend Test Coverage
+
+📘 15+ Pages of Documentation
+
+⌛ Built in 7 Days (solo dev)
+
+🧠 Future Enhancements:
+
+🔔 Email notifications for tasks
+
+🧑‍🤝‍🧑 Role-based access (Admin, Member)
+
+📅 Calendar view of deadlines
+
+📈 Analytics for team leaders
+
+  
 ✅ Assign Tasks to Team Members  
 ✅ Task Completion Status  
 ✅ Deadline Tracking and Overdue Highlighting  
@@ -62,8 +163,6 @@ todo-team-app/
 ### `POST /api/auth/register`
 
 Registers a new user.
-
-```json 
 {
   "name": "Jane",
   "email": "jane@example.com",
@@ -165,3 +264,4 @@ mindmap
 
 📈 Analytics for team leaders
 
+```json 
